@@ -9,9 +9,9 @@ authRouter.post(
   ValidatorMiddleware.validateBody(validators.SigninValidator),
   async (req: Request<unknown, unknown, validators.SigninValidator>, res: Response) => {
     const { body } = req;
-    const token = await authController.signIn(body);
-    res.status(200).send({ access_token: token });
-    console.log({ token: token });
+    const response = await authController.signIn(body);
+    res.status(200).send({ access_token: response.access_token , role: response.role });
+    console.log({ token: response.access_token, role: response.role });
   },
 );
 

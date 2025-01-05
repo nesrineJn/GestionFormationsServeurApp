@@ -3,9 +3,7 @@ import { authService, userService } from '../services';
 import { bcryptService, jwtService, validators } from '../middlewares';
 
 export const signIn = async (body: validators.SigninValidator) => {
-  const email = body.email;
-  const password = body.password;
-
+  const { email, password } = body;
   const user = await userService.getOne({ email });
 
   if (!user) {
@@ -13,13 +11,21 @@ export const signIn = async (body: validators.SigninValidator) => {
   }
 
   const isMatch = await bcryptService.compare(password, user.password);
-
   if (!isMatch) {
     throw new UnauthorizedError('Mot de passe incorrect');
   }
 
-  return await jwtService.generateToken({ id: user._id.toString() });
+  const token = await jwtService.generateToken({
+    id: user._id.toString()
+  });
+
+  // Retourner le token et le rôle dans la réponse
+  return {
+    access_token: token,
+    role: user.role  // Assurez-vous que `role` est bien défini dans votre schéma utilisateur
+  };
 };
+
 
 export const registerUser = async (body: validators.RegisterValidator) => {
   const { email, password, fullName, phoneNumber } = body;
